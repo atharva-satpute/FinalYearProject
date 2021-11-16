@@ -17,7 +17,15 @@ processed_bug_2 = processDocument(bug2_document)
 matrix, tfidf = score1(processed_bug_1, processed_bug_2)
 
 _score1 = cosine_similarity(matrix[0,:], matrix[1,:])
+
+# Take input from function
+_score2 = 1
+
 _score3 = score3(bug1_document, bug2_document)
+
+_score = (_score1 + _score2) * _score3
 
 print("similarity: ", cosine_similarity(matrix[0,:], matrix[1,:]))
 print("Score3: ", _score3)
+
+print("Score: ", _score)
