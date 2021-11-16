@@ -28,4 +28,4 @@ def score3(document1, document2):
     else:
         score = 0.0
         
-    return score
+    return score;
