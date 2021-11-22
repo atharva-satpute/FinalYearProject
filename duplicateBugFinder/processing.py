@@ -60,14 +60,14 @@ def cleaning(document):
         document = re.sub(r"(Testcase\:.*\})",'',document)
         
         # To remove all text within () or [] or <>
-        document = re.sub(r"(\([a-zA-Z0-9\s\+\*\.\,\<\-\>\?\\n\-\'\_\/\$\[\]\(\"\:\#\;]*\)+|(\[[a-zA-Z0-9\s\:]*\])|(\<[a-zA-Z0-9\_\.\s\:\<\,]*\>+))",
+        document = re.sub(r"(\([a-zA-Z0-9\s\+\*\.\,\<\-\>\?\\n\-\'\_\/\$\[\]\(\"\:\#\;\%\!]*\)+|(\[[a-zA-Z0-9\s\:]*\])|(\<[a-zA-Z0-9\_\.\s\:\<\,]*\>+))",
                        '',document)
         
         # To remove alphanumeric string like 1GE8YMJ:
         document = re.sub(r"([0-9][a-zA-Z0-9]{6}(\:)*)",'',document)
         
         # To remove string starting with CVS/
-        document = re.sub(r"(CVS\/[a-zA-Z]{1,15})",'',document)
+        document = re.sub(r"(CVS(\/)*([a-zA-Z]{1,15}\.[a-zA-Z]*)*)",'',document)
         
         # Remove string '....'
         document = re.sub(r"\.{2,5}",' ',document)
@@ -85,7 +85,13 @@ def cleaning(document):
         document = re.sub(r"([A-Z\.]*(\=)+[a-zA-Z0-9\s\.\_]*)",'',document)
         
         # To remove strings like (- v, - y)
-        document = re.sub(r"(\-(\s)*[a-zA-Z]+)",'',document)
+        document = re.sub(r"(\-(\s)+[a-zA-Z]+)",'',document)
+        
+        # To remove string like ITPVCM:WINNT
+        document = re.sub(r"([a-zA-Z]+:[a-zA-Z]+)",'',document)
+        
+        # To change words like Don't to Dont
+        document = re.sub(r"(\')",'',document)
         
         # To remove other special chacters
         document = re.sub(r"[\-\'\:\?\/\[\]\"\$\>\<\,\!\+\#\*\_\|\;\}\{]",' ',document)
@@ -93,11 +99,11 @@ def cleaning(document):
         # To remove string like (STACK 0) (bug_id: 88623)
         document = re.sub(r"([A-Z]+\s[0-9]+)",'',document)
         
-        # To remove unwanted 2-3 digit numbers
-        # document = re.sub(r"([0-9]([0-9])+)",'',document)
+        # To remove unwanted 2-3.$$$ digit numbers
+        document = re.sub(r"([0-9]([0-9])+\.*[0-9]*)",'',document)
         
         # To remove all spaces greater than 2
-        document = re.sub(r"((\s){2,}|\.)",' ',document)
+        document = re.sub(r"((\s){2,})",' ',document)
         
     except TypeError:
         pass
