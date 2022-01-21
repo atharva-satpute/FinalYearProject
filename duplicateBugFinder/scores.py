@@ -1,4 +1,6 @@
-import sklearn
+import numpy as np
+from gensim.models import Word2Vec
+from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 def score1(document1, document2):
@@ -11,6 +13,15 @@ def score1(document1, document2):
     result = tfidf.fit_transform(combined)
     
     return result,tfidf
+
+def score2(document1:list, document2:list):
+    model = Word2Vec.load('./trained_sg.model')
+    
+    def mean_vector(model,wordsTokens:list):
+        return np.mean(model.wv[wordsTokens],axis = 0)
+    
+    meanVector1, meanVector2 = mean_vector(model,document1),mean_vector(model,document2)
+    return cosine_similarity([meanVector1],[meanVector2])
 
 def score3(document1, document2):
     
@@ -28,4 +39,4 @@ def score3(document1, document2):
     else:
         score = 0.0
         
-    return score;
+    return score
