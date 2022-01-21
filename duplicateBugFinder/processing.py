@@ -4,27 +4,32 @@ import nltk
 # General Libraries
 import re
 # NLP
-from nltk.stem import WordNetLemmatizer
 from nltk.stem.snowball import SnowballStemmer
 from nltk.corpus import stopwords
-from nltk.tokenize import wordpunct_tokenize,word_tokenize
+from nltk.tokenize import wordpunct_tokenize
 # Pymongo
-from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
+
+import warnings
+warnings.filterwarnings('ignore')
+
 
 # Check if corpus of stopwords and wordnet exists
 try:
-    nltk.find('stopwords')
-    nltk.find('wordnet')
+    nltk.data.find('./corpora/stopwords')
 except LookupError:
     nltk.download('stopwords')
+
+try:
+    nltk.data.find('./corpora/wordnet')
+except LookupError:
     nltk.download('wordnet')
     
 
 def cleaning(document):
     try:
         # To remove timestamp and date
-        document = re.sub(r"(([A-Z]{2})* [\([0-9]+\/[0-9]+\/[0-9]+ [0-9]+:[0-9]{2}:[0-9]{2} (AM|PM)\))",'',document)
+        document = re.sub(r"(([A-Z]{2,})* [\([0-9]+\/[0-9]+\/[0-9]+ [0-9]+:[0-9]{2}:[0-9]{2} (AM|PM)\))",'',document)
         
         # To remove XML code
         document = re.sub(r"(\<\?xml[a-zA-Z0-9\.\s\=\?\"\-\>\\n\<\:\/\_]*(\<\/)[a-zA-Z0-9\:\_]*\>)",'',document)
@@ -32,7 +37,7 @@ def cleaning(document):
         
         # To remove any hyperlinks
         document = re.sub(r"(http|https):(\/{2})(www\.)([a-zA-z0-9]*\.([a-z]*)(\.)*)",'',document)
-        document = re.sub(r"(http|https):(\/{2}[a-zA-Z0-9\.\-\/\\n\:]*)",'',document)
+        document = re.sub(r"(http|https):(\/{2}[a-zA-Z0-9\.\-\/\:\?\=]*)",'',document)
         
         
         # To remove error string like in bug_id:99873
@@ -41,7 +46,10 @@ def cleaning(document):
                        '',document)
         
         # To remove the org. from error eg(org.eclipse.ui.internal.Workbench.createAndRunWorkbench(Workbench.java:366))
-        document = re.sub(r"((\()*(org|sun|java|junit|e.g)\.[a-zA-Z0-9\.\$\(\:\s\-\,\_\\]*(\)+|))",'',document)
+        document = re.sub(r"((\()*(org|sun|java|junit|e.g)\.[a-zA-Z0-9\.\$\(\:\s\-\,\_\\\<\>]*(\)+|))",'',document)
+        
+        # To remove string like 'Log: Wed Jun 06 12:51:50 EDT 2001'
+        document = re.sub(r"(Log\:[a-zA-Z0-9\s\:]+([0-9]{4}))",'',document)
         
         # To remove strings like /usr/lib/libthread.so.1  (bug_id:33431)
         document = re.sub(r"((\/opt|\/usr)\/[a-zA-Z0-9\/\.\_\,\-]*)",'',document)
@@ -73,19 +81,19 @@ def cleaning(document):
         document = re.sub(r"\.{2,5}",' ',document)
         
         # To remove file name 'org.eclipse.gmt.am3.usecase.osgipluginmanagement.zip'
-        # document = re.sub(r"(org\.[a-zA-Z0-9\.\$\=\_\(\:\s]*(zip|gz|tar))",'',document)
+        document = re.sub(r"(org\.[a-zA-Z0-9\.\$\=\_\(\:\s]*(zip|gz|tar))",'',document)
         
         # To remove strings like 'Authors: Mathieu Vénisse & Guillaume Doux'
         document = re.sub(r"(Authors\:[\sA-Za-z\u00C0-\u00ff\&]+)",'',document)
         
-        # To remove string 'Best regards'
-        document = re.sub(r"(Best regards\,.+\.)",'',document)
+        # To remove string 'Best regards' and NOTES:
+        document = re.sub(r"((Best regards\,.+\.)|(NOTES\:))",'',document)
         
         # To remove strings like OS=linux, ARCH=x86
         document = re.sub(r"([A-Z\.]*(\=)+[a-zA-Z0-9\s\.\_]*)",'',document)
         
         # To remove strings like (- v, - y)
-        document = re.sub(r"(\-(\s)+[a-zA-Z]+)",'',document)
+        document = re.sub(r"((\-)+(\s)*[a-zA-Z]\W)",' ',document)
         
         # To remove string like ITPVCM:WINNT
         document = re.sub(r"([a-zA-Z]+:[a-zA-Z]+)",'',document)
@@ -93,22 +101,33 @@ def cleaning(document):
         # To change words like Don't to Dont
         document = re.sub(r"(\')",'',document)
         
+        # To remove email
+        document = re.sub(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",'',document)
+        
+        # To remove windows path
+        document = re.sub(r"[a-zA-Z]:[\\]{2}(?:[a-zA-Z0-9\.]+[\\\/]{1,2})*",'',document)
+        
+        # To remove \\
+        document = re.sub(r"(\\){2}",'',document)
+        
         # To remove other special chacters
-        document = re.sub(r"[\-\'\:\?\/\[\]\"\$\>\<\,\!\+\#\*\_\|\;\}\{]",' ',document)
+#         document = re.sub(r"[\-\'\:\?\/\[\]\"\$\>\<\,\!\+\#\*\_\|\;\}\{\(\)]",' ',document) -> replaced with a short regex
+        document = re.sub(r"[^a-zA-Z\s\\]",' ',document)
         
         # To remove string like (STACK 0) (bug_id: 88623)
         document = re.sub(r"([A-Z]+\s[0-9]+)",'',document)
         
-        # To remove unwanted 2-3.$$$ digit numbers
-        document = re.sub(r"([0-9]([0-9])+\.*[0-9]*)",'',document)
+        # To remove repetitive characters (bug_id: 170,146)
+        document = re.sub(r"\b[\\](\w+)(?:\w+\1\b)+",'',document)
         
         # To remove all spaces greater than 2
         document = re.sub(r"((\s){2,})",' ',document)
         
+        
     except TypeError:
-        pass
+        print('TypeError for bug id: ',document['bug_id'])
     except DuplicateKeyError:
-        pass
+        print('DuplicateKeyError for bug id: ',document['bug_id'])
     
     return document
     
@@ -118,7 +137,7 @@ def tokenize(document):
     return tokens
 
 def removeStopwords(tokens):
-    tokens_without_sw = [word for word in tokens if not word in stopwords.words()]
+    tokens_without_sw = [word.lower() for word in tokens if not word in stopwords.words()]
     
     return tokens_without_sw
 
@@ -128,15 +147,14 @@ def wordStemming(tokens):
     
     return stem_words
 
-def processDocument(document):
+def processDocument(document,score:int):
     
     contentofInterest = document['description'] + document['short_desc']  # COI
     
     cleanedCOI = cleaning(contentofInterest)
     tokenized_COI = tokenize(cleanedCOI)
     COI_without_sw = removeStopwords(tokenized_COI)
-    stemmed_COI = wordStemming(COI_without_sw)
-    
-    return stemmed_COI
-
+    if score == 1:
+        return wordStemming(COI_without_sw)
+    return COI_without_sw
     
