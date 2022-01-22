@@ -29,7 +29,7 @@ except LookupError:
 def cleaning(document):
     try:
         # To remove timestamp and date
-        document = re.sub(r"(([A-Z]{2,})* [\([0-9]+\/[0-9]+\/[0-9]+ [0-9]+:[0-9]{2}:[0-9]{2} (AM|PM)\))",'',document)
+        document = re.sub(r"(([A-Z]{2,}\s)*(\([0-9\/]+(\s)*[0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2} (AM|PM)*)\))",'',document)
         
         # To remove XML code
         document = re.sub(r"(\<\?xml[a-zA-Z0-9\.\s\=\?\"\-\>\\n\<\:\/\_]*(\<\/)[a-zA-Z0-9\:\_]*\>)",'',document)
@@ -76,9 +76,6 @@ def cleaning(document):
         
         # To remove string starting with CVS/
         document = re.sub(r"(CVS(\/)*([a-zA-Z]{1,15}\.[a-zA-Z]*)*)",'',document)
-        
-        # Remove string '....'
-        document = re.sub(r"\.{2,5}",' ',document)
         
         # To remove file name 'org.eclipse.gmt.am3.usecase.osgipluginmanagement.zip'
         document = re.sub(r"(org\.[a-zA-Z0-9\.\$\=\_\(\:\s]*(zip|gz|tar))",'',document)
