@@ -32,4 +32,5 @@ class MongoDB(DB):
         query = {"product" : product,
                  "component": component}
         query_reports = self.db[self.processed_collection].find(query)
+
         return query_reports
