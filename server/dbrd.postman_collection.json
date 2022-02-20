@@ -1,0 +1,62 @@
+{
+	"info": {
+		"_postman_id": "209d4754-086e-4b2d-9872-dc05d7906807",
+		"name": "dbrd",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Application Status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:5000/status",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Post a report",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"bug_id\": \"19\",\r\n    \"product\": \"Platform\",\r\n    \"description\": \"I should be able to pick a stream from the respository and catchup to the stream.\\nInstead I must select projects within the stream and \\\"add to workspace\\\".\\nThis is annoying because it doesn't merge it bashes, and besides it warns you\\nabout every project that you already have loaded.\\n\\nBasically, it should work the same as picking the individual projects from the navigator\\nand catching up, except instead I'm picking the stream to denote the set of projects.\\n\\nNOTES:\\n\\nBB (17/04/2001 9:57:55 PM)\\n\\tNote that the lineup of projects in a stream (at least for CVS) is not necessarily\\n\\tmeaningful, because projects added to one stream will show up in all other\\n\\tstreams in the same repository. A new project in a stream is also not an incoming\\n\\tcreation of the project; you would have to use project references for transitive\\n\\tloading or transitive catching up.\\n\\tIt would be useful, though, to have a global toolbar button which does a catchup\\n\\ton all shared projects.\\n\\nJean-Michel (4/25/01 9:14:46 AM)\\n\\t1GCQK5Y: ITPVCM:WINNT - Should be able to add HEAD to workspace\\n\\tMoving to time permitting.\",\r\n    \"bug_severity\": \"normal\",\r\n    \"dup_id\": [],\r\n    \"short_desc\": \"[CVS Repo View] Should be able to pick a branch and catchup to it\",\r\n    \"priority\": \"P4\",\r\n    \"version\": \"2.0\",\r\n    \"component\": \"Team\",\r\n    \"delta_ts\": \"2004-11-09 21:38:05 -0500\",\r\n    \"bug_status\": \"RESOLVED\",\r\n    \"creation_ts\": \"2001-10-10 21:35:00 -0400\",\r\n    \"resolution\": \"WONTFIX\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/insert",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"insert"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

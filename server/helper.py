@@ -1,6 +1,9 @@
 from FinalYearProject.dbrd.processing import cleaning, tokenize, removeStopwords, processDocument, wordStemming
 import gensim
 from FinalYearProject.dbrd.scores import score1, score2, score3
+from Constants.Codes import error_codes
+
+from models.Response import Response
 
 from databases.mongodb import MongoDB
 
@@ -38,17 +41,28 @@ def process(bug_report):
     if not _id:
         return "Error"
 
-    findDuplicates(processed_bug_report)
-    return "Success"
+    possible_duplicate = findDuplicates(processed_bug_report)
+    if not possible_duplicate:
+        res = vars(Response(error_codes['SS'], "No duplicate found. The bug report has been added into the database."))
+        print(res)
+        return res
+    else:
+        res = vars(
+            Response(error_codes['SS'], "Bug report with id {}, is a possible duplicate.".format(possible_duplicate)))
+        print(res)
+        return res
 
 
 def findDuplicates(processed_document):
-    cur = db.getProcessedReportsWithProductAndComponent(processed_document['product'], processed_document['component'])
+    cursor = db.getProcessedReportsWithProductAndComponent(processed_document['product'],
+                                                           processed_document['component'])
 
-    for doc in cur:
-        score = calculateScore(processed_document, doc)
-        print(doc['_id'], score)
-        # print("Score with {} is {}".format(doc['_id'], score))
+    scores = [(calculateScore(processed_document, doc), doc['bug_id']) for doc in cursor]
+    scores.sort(key=lambda i: i[0], reverse=True)
+
+    # here we can apply top-k approach for better accuracy
+    print(scores)
+    return scores[0][1] if scores[0][0][0][0] >= 1.5 else None
 
 
 def calculateScore(document1, document2):

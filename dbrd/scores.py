@@ -12,8 +12,8 @@ def score1(document1, document2):
     return cosine_similarity(result[0, :], result[1, :])[0]
 
 
-def mean_vector(model, wordsTokens: list):
-    return np.mean(model.wv[wordsTokens], axis=0)
+def mean_vector(model, words_tokens: list):
+    return np.mean(model.wv[words_tokens], axis=0)
 
 
 def score2(document1: list, document2: list, model):
