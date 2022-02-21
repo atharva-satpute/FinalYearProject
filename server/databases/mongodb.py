@@ -1,6 +1,9 @@
 
+# Third-party Libraries
 from pymongo import MongoClient
-from FinalYearProject.server.databases.base_db import DB
+
+# Local Libraries
+from databases.base_db import DB
 
 
 class MongoDB(DB):

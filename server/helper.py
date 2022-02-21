@@ -1,11 +1,17 @@
-from FinalYearProject.dbrd.processing import cleaning, tokenize, removeStopwords, processDocument, wordStemming
-import gensim
-from FinalYearProject.dbrd.scores import score1, score2, score3
-from Constants.Codes import error_codes
+import os
+import sys
 
+sys.path.insert(0,os.getcwd())
+# Third-party libraries
+import gensim
+
+# Local Libraries
+from Constants.Codes import error_codes
+from databases.mongodb import MongoDB
+from dbrd.processing import cleaning, tokenize, removeStopwords, processDocument, wordStemming
+from dbrd.scores import score1, score2, score3
 from models.Response import Response
 
-from databases.mongodb import MongoDB
 
 db = None
 skip_gram_model = None
@@ -16,7 +22,7 @@ def initialize(args):
 
     if not skip_gram_model:
         skip_gram_model = gensim.models.Word2Vec.load(
-            "../dbrd/trained_model/trained_sg_270122_2_corpus_ds.model", mmap='r')
+            "./dbrd/trained_model/trained_sg_270122_2_corpus_ds.model", mmap='r')
 
     if not db:
         if args["database_type"] == 1:

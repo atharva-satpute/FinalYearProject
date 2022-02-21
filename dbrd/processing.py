@@ -1,16 +1,14 @@
-# NLP
-import nltk
-
 # General Libraries
 import re
+import warnings
+
 # NLP
-from nltk.stem.snowball import SnowballStemmer
+import nltk
 from nltk.corpus import stopwords
+from nltk.stem.snowball import SnowballStemmer
 from nltk.tokenize import wordpunct_tokenize
 # Pymongo
 from pymongo.errors import DuplicateKeyError
-
-import warnings
 
 warnings.filterwarnings('ignore')
 

@@ -1,4 +1,7 @@
+# Third-party Libraries
 from pymongo import MongoClient
+
+# Local Libraries
 from processing import processDocument
 
 
