@@ -1,10 +1,15 @@
-from pymongo import MongoClient
-#Sklearn
+# Built-in Libraries
 from sklearn.metrics.pairwise import cosine_similarity
-from scores import score1, score2, score3
-from processing import processDocument
-
 import warnings
+
+# Third-party Libraries
+from pymongo import MongoClient
+
+# Local Libraries
+from processing import processDocument
+from scores import score1, score2, score3
+
+
 warnings.filterwarnings('ignore')
 
 client = MongoClient('localhost',27017)
