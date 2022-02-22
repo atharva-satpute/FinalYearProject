@@ -1,7 +1,16 @@
+# Built-in Libraries
 import os
 import sys
 
-sys.path.insert(0,os.getcwd())
+# Initially sys.path[0] will be './FinalYearProject/server'
+sys.path.insert(0,os.path.dirname(sys.path[0]))
+""" 
+    After execution of the above statement 
+    sys.path[0] will './FinalYearProject' and sys.path[1] will be './FinalYearProject/server' 
+    
+"""
+
+
 # Third-party libraries
 import gensim
 
@@ -20,9 +29,10 @@ skip_gram_model = None
 def initialize(args):
     global db, skip_gram_model
 
+
     if not skip_gram_model:
         skip_gram_model = gensim.models.Word2Vec.load(
-            "./dbrd/trained_model/trained_sg_270122_2_corpus_ds.model", mmap='r')
+            sys.path[0] + "/dbrd/trained_model/trained_sg_270122_2_corpus_ds.model", mmap='r')
 
     if not db:
         if args["database_type"] == 1:
