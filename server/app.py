@@ -1,7 +1,11 @@
 # Built-in Libraries
 import argparse
+from crypt import methods
+import json
+from logging.config import fileConfig
 import os
 import sys
+from tabnanny import check
 import yaml
 
 # Third-party Libraries
@@ -14,7 +18,8 @@ from helper import process, initialize
 from models.Response import Response
 
 # This file's directory path
-PATH = sys.path[1]
+PATH = sys.path[1] + os.sep
+UPLOAD_FILE_PATH = PATH + 'uploads' + os.sep
 
 
 # Loading configurations
@@ -24,7 +29,7 @@ PATH = sys.path[1]
     MacOS & Linux: '/'
 
 """
-with open(os.path.join(PATH + os.sep,'config.yaml'),'r') as configFile:
+with open(PATH + 'config.yaml','r') as configFile:
     config = yaml.safe_load(configFile)
 configFile.close()
 
@@ -57,12 +62,12 @@ def insertIntoDB():
         return vars(Response(error_codes['ISE'], "Something wrong happened at server side"))
 
 
-# React Routes
+
+# React Routes (.json,.csv files)
 @app.route('/upload', methods=['POST'])
 def fileUpload():
     uploadedFile = request.files['file']
-    if uploadedFile.name != '':
-        uploadedFile.save('./uploads' + uploadedFile.filename)
+    if uploadedFile.filename != '':
         return jsonify({"Success": 200})
 
 
