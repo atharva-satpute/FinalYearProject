@@ -12,6 +12,7 @@ from pymongo.errors import DuplicateKeyError
 
 warnings.filterwarnings('ignore')
 
+
 # Check if corpus of stopwords and wordnet exists
 try:
     nltk.data.find('./corpora/stopwords')
