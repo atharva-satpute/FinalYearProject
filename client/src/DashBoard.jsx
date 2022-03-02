@@ -4,80 +4,72 @@ import { Box, Button, InputBase } from '@mui/material';
 import Navbar from "./components/Navbar/NavBar";
 
 import './DashBoard.css';
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 
-class DashBoard extends React.PureComponent {
+const DashBoard = () => {
 
-    state = {
-        isUserAuth: false,
-        searchID: null,
-        selectedFile: null
+    const [isUserAuth, setUserAuth] = useState(false);
+    const [searchID, setSearchID] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+
+    const isUserAuthCallback = (auth) => {
+        setUserAuth(auth);
     }
 
-    isUserAuthCallback = (auth) => {
-        this.setState({
-            isUserAuth: auth
-        });
+    const onFileChange = (event) => {
+        setSelectedFile((event) ? event.target.files[0] : null);
     }
 
-    onFileChange = (event) => {
-        this.setState({
-            selectedFile: (event) ? (event.target.files[0]) : null
-        });
-    }
-
-    render() {
-        return (
-            <div className="dashboard-container">
-                <Navbar authCheck={this.state.isUserAuth}/>
-                <div className="search-container">
-                    <div className="search-bar">
-                        <Box
-                            borderRadius={2}
-                            display='flex'
-                            sx={{ 
-                                flexGrow: 1,
-                                boxShadow: 2
-                            }}
-                        >
-                            <InputBase
-                                autoFocus
-                                fullWidth
-                                type="text"
-                                placeholder="Search Bug ID"
-                                sx={{ 
-                                    flexGrow: 1, 
-                                    borderRadius: 2,
-                                    paddingLeft: 2
-                                }}
-
-                                onChange={(event) => {
-                                    this.setState({
-                                        searchID: event.target.value
-                                    })
-                                }}
-                            />
-                        </Box>
-                        <Button
-                            variant="contained"
-                            sx={{
-                                marginLeft: 1
-                            }}
-                        >
-                            Search
-                        </Button>
-                    </div>
-                    <p>or</p>
-                    <input
-                        accept=".json, .csv"
-                        type={'file'}
-                        onChange={(event) => {
-                            this.onFileChange(event)
+    return (
+        <div className="dashboard-container">
+            <Navbar authCheck={isUserAuth}/>
+            <div className="search-container">
+                <div className="search-bar">
+                    <Box
+                        borderRadius={2}
+                        display='flex'
+                        sx={{ 
+                            flexGrow: 1,
+                            boxShadow: 2
                         }}
-                    />                 
+                    >
+                        <InputBase
+                            autoFocus
+                            fullWidth
+                            type="text"
+                            placeholder="Search Bug ID"
+                            sx={{ 
+                                flexGrow: 1, 
+                                borderRadius: 2,
+                                paddingLeft: 2
+                            }}
+
+                            onChange={(event) => {
+                                setSearchID(event.target.value);
+                            }}
+                        />
+                    </Box>
+                    <Button
+                        variant="contained"
+                        sx={{
+                            marginLeft: 1
+                        }}
+                    >
+                        Search
+                    </Button>
                 </div>
+                <p>or</p>
+                <input
+                    accept=".json, .csv"
+                    type={'file'}
+                    onChange={(event) => {
+                        onFileChange(event)
+                    }}
+                />                 
             </div>
-        );
-    }
+        </div>
+    );
 }
 export default DashBoard;
