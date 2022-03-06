@@ -101,17 +101,17 @@ def cleaning(document):
         document = re.sub(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", '', document)
 
         # To remove windows path
-        document = re.sub(r"[a-zA-Z]:[\\]{2}(?:[a-zA-Z0-9\.]+[\\\/]{1,2})*", '', document)
-
-        # To remove \\
-        document = re.sub(r"(\\){2}", '', document)
+        document = re.sub(r"([a-zA-Z]:[\\]{2}(?:[a-zA-Z0-9\.]+[\\\/]{1,2})*)", '', document)
 
         # To remove other special chacters
         #         document = re.sub(r"[\-\'\:\?\/\[\]\"\$\>\<\,\!\+\#\*\_\|\;\}\{\(\)]",' ',document) -> replaced with a short regex
-        document = re.sub(r"[^a-zA-Z\s\\]", ' ', document)
+        document = re.sub(r"[^a-zA-Z\s]", ' ', document)
 
         # To remove string like (STACK 0) (bug_id: 88623)
         document = re.sub(r"([A-Z]+\s[0-9]+)", '', document)
+
+        # To remove \\
+        document = re.sub(r"(\\){2}", '', document)
 
         # To remove repetitive characters (bug_id: 170,146)
         document = re.sub(r"\b[\\](\w+)(?:\w+\1\b)+", '', document)
