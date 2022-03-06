@@ -23,8 +23,7 @@ class MongoDB(DB):
         return _id
 
     def addProcessedReport(self, processed_bug_report):
-        _id = self.db[self.processed_collection].insert_one(processed_bug_report)
-        return _id
+        self.db[self.processed_collection].insert_one(processed_bug_report)
 
     def getProcessedReportById(self, bug_id):
         query = {"bug_id": bug_id}
