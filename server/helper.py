@@ -1,6 +1,9 @@
 # Built-in Libraries
+import json
 import os
 import sys
+from unittest import result
+from flask import jsonify
 
 # Initially sys.path[0] will be './FinalYearProject/server'
 sys.path.insert(0,os.path.dirname(sys.path[0]))
@@ -32,7 +35,7 @@ def initialize(args):
 
     if not skip_gram_model:
         skip_gram_model = gensim.models.Word2Vec.load(
-            sys.path[0] + "/dbrd/trained_model/trained_sg_270122_2_corpus_ds.model", mmap='r')
+            os.path.join(sys.path[0],"dbrd","trained_model","trained_sg.model"), mmap='r')
 
     if not db:
         if args["database_type"] == 1:
@@ -41,21 +44,26 @@ def initialize(args):
             pass
 
 
-def process(bug_report):
-    _id = db.addReport(bug_report)
-    if not _id:
-        return "Error"
+def process(bug_id):
+    # _id = db.addReport(bug_report)
+    # if not _id:
+    #     return "Error"
+    processed_bug_report = db.getProcessedReportById(bug_id)
+    if processed_bug_report is None:
+        bug_report = db.getReportById(bug_id)
 
-    processed_document = processDocument(bug_report)
-    processed_bug_report = {
-        "bug_id": bug_report['bug_id'],
-        "data": processed_document,
-        "product": bug_report['product'],
-        "component": bug_report['component']
-    }
-    _id = db.addProcessedReport(processed_bug_report)
-    if not _id:
-        return "Error"
+        # Preprocess the document
+        processed_document = processDocument(bug_report)
+    
+        processed_bug_report = {
+            "bug_id": bug_report['bug_id'],
+            "data": processed_document,
+            "product": bug_report['product'],
+            "component": bug_report['component']
+        }
+
+        # Add the new report to processed collection
+        db.addProcessedReport(processed_bug_report)
 
     possible_duplicate = findDuplicates(processed_bug_report)
     if not possible_duplicate:
@@ -63,22 +71,35 @@ def process(bug_report):
         print(res)
         return res
     else:
-        res = vars(
-            Response(error_codes['SS'], "Bug report with id {}, is a possible duplicate.".format(possible_duplicate)))
-        print(res)
-        return res
+        # res = vars(
+        #     Response(error_codes['SS'], "Bug report with id {}, is a possible duplicate.".format(possible_duplicate)))
+        # print(res)
+        # return res
+        return possible_duplicate
 
 
 def findDuplicates(processed_document):
+    '''
+
+        Fetching documents from processed collection based on the product and
+        component value.
+
+    '''
     cursor = db.getProcessedReportsWithProductAndComponent(processed_document['product'],
                                                            processed_document['component'])
 
     scores = [(calculateScore(processed_document, doc), doc['bug_id']) for doc in cursor]
+
+    # Sorting the similarity scores in descending order
     scores.sort(key=lambda i: i[0], reverse=True)
 
     # here we can apply top-k approach for better accuracy
-    print(scores)
-    return scores[0][1] if scores[0][0][0][0] >= 1.5 else None
+    # print("Scores:",scores)
+    # return scores[0][1] if scores[0][0][0][0] >= 1.5 else None
+    return jsonify(
+        result=[
+                {score[1]:score[0][0][0]} for score in scores if score[0][0][0] >= 0.95
+            ])
 
 
 def calculateScore(document1, document2):
@@ -99,3 +120,6 @@ def processDocument(document):
     COI_without_sw = removeStopwords(tokenized_COI)
 
     return COI_without_sw
+
+def getBugReport(bug_id):
+    return db.getReportById(bug_id)
