@@ -11,7 +11,7 @@ from flask import Flask, jsonify, request
 
 # Local Libraries
 from Constants.Codes import error_codes
-from helper import process, initialize
+from helper import process, initialize, getBugReport
 from models.Response import Response
 
 # This file's directory path
@@ -49,14 +49,14 @@ def hello_world():
     return vars(Response(error_codes['LP'], "Application is running...! Everything looks fine."))
 
 
-@app.route("/insert", methods=['POST'])
-def insertIntoDB():
-    #try:
-        data = request.json
-        print(data)
-        return process(data)
+# @app.route("/insert", methods=['POST'])
+# def insertIntoDB():
+#     #try:
+#         data = request.json
+#         print(data)
+#         return process(data)
     #except:
-        return vars(Response(error_codes['ISE'], "Something wrong happened at server side"))
+#         return vars(Response(error_codes['ISE'], "Something wrong happened at server side"))
 
 
 
@@ -67,10 +67,17 @@ def fileUpload():
     if uploadedFile.filename != '':
         return jsonify({"Success": 200})
 
+@app.route('/search/<bug_id>', methods=['GET','POST'])
+def searchFile(bug_id):
+    if request.method == 'GET':
+        return json.dumps(getBugReport(bug_id),default=str)
+    return process(bug_id)
+
 
 if __name__ == "__main__":
     initialize(args)
     app.run(
         host = config['flaskserver']['host'],
-        port = config['flaskserver']['port']
+        port = config['flaskserver']['port'],
+        debug=True
     )
