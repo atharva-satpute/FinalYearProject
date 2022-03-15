@@ -1,9 +1,9 @@
 # Built-in Libraries
+from flask import jsonify
 import json
 import os
+import pandas as pd
 import sys
-from unittest import result
-from flask import jsonify
 
 # Initially sys.path[0] will be './FinalYearProject/server'
 sys.path.insert(0,os.path.dirname(sys.path[0]))
@@ -27,6 +27,7 @@ from models.Response import Response
 
 db = None
 skip_gram_model = None
+FILE_PATH = os.path.join(sys.path[1] + os.sep,"uploads" + os.sep)
 
 
 def initialize(args):
@@ -123,3 +124,7 @@ def processDocument(document):
 
 def getBugReport(bug_id):
     return db.getReportById(bug_id)
+
+def handleFile(fileName):
+    data = pd.read_csv(FILE_PATH + fileName, header=None)
+    return list(data[0])
