@@ -11,7 +11,7 @@ from flask import Flask, jsonify, request
 
 # Local Libraries
 from Constants.Codes import error_codes
-from helper import process, initialize, getBugReport
+from helper import process, initialize, getBugReport, handleFile
 from models.Response import Response
 
 # This file's directory path
@@ -65,7 +65,7 @@ def hello_world():
 def fileUpload():
     uploadedFile = request.files['file']
     if uploadedFile.filename != '':
-        return jsonify({"Success": 200})
+        return jsonify(handleFile(uploadedFile.filename))
 
 @app.route('/search/<bug_id>', methods=['GET','POST'])
 def searchFile(bug_id):
