@@ -1,20 +1,7 @@
-import React, {useState} from "react";
-import { useNavigate } from 'react-router-dom';
-import { AppBar, Box, Button, IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material'
-import AccountCircle from '@mui/icons-material/AccountCircle';
+import React from "react";
+import { AppBar, Box, Toolbar, Typography } from '@mui/material';
 
-const Navbar = (props) => {
-
-    const navigate = useNavigate();
-    const [anchorEl, setAnchorEl] = useState(null);
-
-    const handleMenu = (event) => {
-        setAnchorEl(event.currentTarget)
-    }
-
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
+const Navbar = () => {
 
     return (
         <Box sx={{flexGrow: 1}}>
@@ -26,62 +13,9 @@ const Navbar = (props) => {
                     >
                         Duplicate Bugs
                     </Typography>
-
-                    {
-                        !props.authCheck ?
-                        (
-                            <>
-                                <Button 
-                                    color="inherit"
-                                    onClick={() => navigate("/signIn")}
-                                >
-                                    Sign In
-                                </Button>
-                                <Button
-                                    color="inherit"
-                                    onClick={() => navigate("/signUp")}
-                                >
-                                    Sign Up
-                                </Button>
-                            </>
-                        )
-                        :
-                        (
-                            <>
-                                <IconButton 
-                                    size="large"
-                                    aria-label="account of current user"
-                                    aria-controls="account-menu"
-                                    aria-haspopup="true"
-                                    onClick={handleMenu}
-                                >
-                                    <AccountCircle/>
-                                </IconButton>
-                                <Menu
-                                    id="account-menu"
-                                    anchorEl={anchorEl}
-                                    anchorOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right'
-                                    }}
-                                    keepMounted
-                                    transformOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right',
-                                    }}
-                                    open={Boolean(anchorEl)}
-                                    onClose={handleClose}
-                                >
-                                    <MenuItem>Sign Out</MenuItem>
-                                </Menu>
-                            </>
-                        )
-                    }
                 </Toolbar>
             </AppBar>
-        </Box>
-        
+        </Box> 
     );
 }
-
 export default Navbar;
