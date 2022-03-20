@@ -1,24 +1,33 @@
-import React from "react";
+import React, { useEffect } from "react";
 import axios from 'axios';
-import { Box, Button, Grid, InputBase, List, ListItem, Paper, Typography } from '@mui/material';
+import { Box, Button, Grid, IconButton, InputBase, List, ListItem, Paper, Typography } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Navbar from "./components/Navbar/NavBar";
 
 import './DashBoard.css';
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import config from "./config/config.json";
 import DataTable from "./components/DataTable/DataTable";
-
+import DropDownBox from "./components/DropDownBox/DropDownBox";
 
 
 
 const DashBoard = () => {
 
     const [isUserAuth, setUserAuth] = useState(false);
-    const [searchID, setSearchID] = useState(null);
+    const [searchID, setSearchID] = useState("");
+    const [listSearchID, setListSearchID] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
     const [receivedData, setReceivedData] = useState(null);
     const [receivedReport, setReceivedReport] = useState(null);
+    const [receivedItemReport, setReceivedItemReport] = useState(null);
+    const [dropDownList, setDropDownList] = useState([]);
+
+    let buglistElement = document.getElementById('bug-list');
+    let reportToDisplay = document.getElementById('report');
+    let backButton = document.getElementById('back-button');
+
+    
 
     const isUserAuthCallback = (auth) => {
         setUserAuth(auth);
@@ -28,30 +37,94 @@ const DashBoard = () => {
         setSelectedFile((event) ? event.target.files[0] : null);
     }
 
-    function handleSearch() {
-        let URL = `http://${config.server.url}:${config.server.port}` + `/search/${searchID}`;
+    const onDropListChange = (event) => {
+        setListSearchID(event.target.value)
+    }
 
-        // Fetch the report with ID=searchID
+    useEffect(() => {
+        if(listSearchID !== "") {
+            handleSearch(listSearchID)
+        }        
+    },[listSearchID])
+
+    function handleSearch(id) {
+        if(id === "")
+            alert('Enter Bug Id');
+        else {
+        
+            let URL = `http://${config.server.url}:${config.server.port}` + `/search/${id}`;
+
+            // Fetch the report with ID=searchID
+            axios.get(
+                URL
+            )
+            .then((response) => {
+                setReceivedReport(response.data)
+            })
+            .catch((error) => {
+                console.log('Error in receiving the report',error.response.data);
+            });
+
+            // POST the searchID
+            axios.post(
+                URL
+            )
+            .then((response) => {
+                setReceivedData(response.data.result)
+            })
+            .catch((error) => {
+                console.log('Bug Report error:',error.response.data);
+            });
+        }
+    }
+
+    const onFileUpload = () => {
+        let formData = new FormData();
+        formData.append(
+            "file",
+            selectedFile,
+            selectedFile.name
+        );
+        if(selectedFile){
+            // POST data to server
+            axios.post(
+                `http://${config.server.url}:${config.server.port}` + '/upload',
+                formData,
+                {
+                    headers:{"Content-Type" : "multipart/form-data"}
+                }
+            )
+            .then((response) => {
+                console.log("Response:",response);
+                setDropDownList(response.data);
+            })
+            .catch((error) => {
+                console.log("Error:",error.response.data);
+            })
+        }
+    }
+
+    const onBackButtonClick = () => {
+        buglistElement.style.display = 'block';
+        reportToDisplay.style.display = 'none';
+        backButton.style.display = 'none';
+    }
+
+    function itemClicked(listItemID) {
+        buglistElement.style.display = 'none';
+        reportToDisplay.style.display = 'block';
+        backButton.style.display = 'block';
+
+        let URL = `http://${config.server.url}:${config.server.port}` + `/search/${listItemID}`;
         axios.get(
             URL
         )
         .then((response) => {
-            setReceivedReport(response.data)
+            setReceivedItemReport(response.data)
         })
         .catch((error) => {
-            console.log('Error in receiving the report',error.response.data);
-        });
-
-        // POST the searchID
-        axios.post(
-            URL
-        )
-        .then((response) => {
-            setReceivedData(response.data.result)
+            console.log('Error in receiving onClick report',error.response.data);
         })
-        .catch((error) => {
-            console.log('Bug Report error:',error.response.data);
-        });
     }
 
     return (
@@ -86,23 +159,41 @@ const DashBoard = () => {
                     <Button
                         variant="contained"
                         sx={{
+                            maxWidth: '100%',
+                            maxHeight: '100%',
                             marginLeft: 1
                         }}
-                        onClick={handleSearch}
+                        onClick={() => {
+                            handleSearch(searchID)
+                        }}
                     >
                         Search
                     </Button>
                 </div>
-                <p>or</p>
-                <input
-                    accept=".json, .csv"
-                    type={'file'}
-                    onChange={(event) => {
-                        onFileChange(event)
-                    }}
-                />                 
+                <span>or</span>
+                <div className="file-upload-section">
+                    <input
+                        accept=".json, .csv"
+                        type={'file'}
+                        onChange={(event) => {
+                            onFileChange(event)
+                        }}
+                    />
+                    <Button
+                        variant="contained"
+                        sx={{ height: '25px' }}
+                        onClick={ onFileUpload }
+                    >
+                        Upload
+                    </Button>
+                </div>                
             </div>
             <div className="output-container">
+                <div id="back-button">
+                    <IconButton onClick={onBackButtonClick}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                </div>
                 <Grid container columns={16}>
                     <Grid
                         item
@@ -114,15 +205,20 @@ const DashBoard = () => {
                             maxHeight: 675
                         }}
                     >
+                        <div className="select-dropbox">
+                            <DropDownBox
+                                bugList={dropDownList}
+                                onSelect={onDropListChange}
+                            />
+                        </div>
                         {
                             (receivedReport) ?
                             <DataTable content={receivedReport}/>
                             :
                             <h1>No report</h1>
                         }
-                        
                     </Grid>
-                    <Grid 
+                    <Grid
                         item
                         xs={16}
                         md={8}
@@ -134,35 +230,53 @@ const DashBoard = () => {
                             maxHeight: 675
                         }}
                     >
-                        {
-                            (receivedData) ?
-                            (
-                                <List>
-                                    {
-                                        receivedData.map((data) => {
-                                            let key = Object.keys(data);
-                                            return(
-                                                <ListItem key={ key[0] }>
-                                                    <Paper sx={{ width:'100%', paddingLeft:1 }} >
-                                                        <Typography>
-                                                                Bug ID: { key[0] }
-                                                        </Typography>
-                                                        <Typography>
-                                                            Score: { data[key[0]] }
-                                                        </Typography>
-                                                    </Paper>
-                                                </ListItem>
-                                            );
-                                        })
-                                    }                       
-                                </List>
-                            )
-                            :
-                            (
-                                <h2>No similar reports</h2>
-                            )
-                        }
-                        
+                        <div id="change-output">
+                            <div id="bug-list">
+                                {
+                                    (receivedData) ?
+                                    (
+                                        <List>
+                                            {
+                                                receivedData.map((data) => {
+                                                    let key = Object.keys(data);
+                                                    return(
+                                                        <ListItem 
+                                                            id={ key[0] }
+                                                            key={ key[0] }
+                                                            sx={{ cursor: "pointer" }}
+                                                            onClick={() => {
+                                                                itemClicked(key[0])
+                                                            }}
+                                                        >
+                                                            <Paper sx={{ width:'100%', paddingLeft:1}} >
+                                                                <Typography >
+                                                                        Bug ID: { key[0] }
+                                                                </Typography>
+                                                                <Typography>
+                                                                    Score: { data[key[0]] }
+                                                                </Typography>
+                                                            </Paper>
+                                                        </ListItem>
+                                                    );
+                                                })
+                                            }
+                                        </List>
+                                    )
+                                    :
+                                    (
+                                        <h2>No similar reports</h2>
+                                    )
+                                }
+                            </div>
+                            <div id="report">
+                                {
+                                    (receivedItemReport) ?
+                                    <DataTable content={receivedItemReport} />
+                                    :
+                                    <h1>No report found</h1>
+                                }                                
+                            </div>
+                        </div>
                     </Grid>
                 </Grid>
             </div>
