@@ -14,7 +14,6 @@ import DropDownBox from "./components/DropDownBox/DropDownBox";
 
 const DashBoard = () => {
 
-    const [isUserAuth, setUserAuth] = useState(false);
     const [searchID, setSearchID] = useState("");
     const [listSearchID, setListSearchID] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
@@ -28,11 +27,6 @@ const DashBoard = () => {
     let backButton = document.getElementById('back-button');
 
     
-
-    const isUserAuthCallback = (auth) => {
-        setUserAuth(auth);
-    }
-
     const onFileChange = (event) => {
         setSelectedFile((event) ? event.target.files[0] : null);
     }
@@ -52,7 +46,7 @@ const DashBoard = () => {
             alert('Enter Bug Id');
         else {
         
-            let URL = `http://${config.server.url}:${config.server.port}` + `/search/${id}`;
+            let URL = `http://${config.server.url}:${config.server.port}/search/${id}`;
 
             // Fetch the report with ID=searchID
             axios.get(
@@ -88,7 +82,7 @@ const DashBoard = () => {
         if(selectedFile){
             // POST data to server
             axios.post(
-                `http://${config.server.url}:${config.server.port}` + '/upload',
+                `http://${config.server.url}:${config.server.port}/upload`,
                 formData,
                 {
                     headers:{"Content-Type" : "multipart/form-data"}
@@ -115,7 +109,7 @@ const DashBoard = () => {
         reportToDisplay.style.display = 'block';
         backButton.style.display = 'block';
 
-        let URL = `http://${config.server.url}:${config.server.port}` + `/search/${listItemID}`;
+        let URL = `http://${config.server.url}:${config.server.port}/search/${listItemID}`;
         axios.get(
             URL
         )
@@ -129,7 +123,7 @@ const DashBoard = () => {
 
     return (
         <div className="dashboard-container">
-            <Navbar authCheck={isUserAuth}/>
+            <Navbar />
             <div className="search-container">
                 <div className="search-bar">
                     <Box
