@@ -13,7 +13,14 @@ const DataTable = (props) => {
                             return(
                                 <TableRow key={key}>
                                     <TableCell>{ key }:</TableCell>
-                                    <TableCell>{ data[key] }</TableCell>
+                                    <TableCell 
+                                        sx={{
+                                            whiteSpace: 'normal',
+                                            wordBreak: 'break-word'
+                                        }}
+                                    >
+                                        { data[key] }
+                                    </TableCell>
                                 </TableRow>
                             );
                         })
