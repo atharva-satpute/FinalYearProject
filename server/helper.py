@@ -99,7 +99,8 @@ def findDuplicates(processed_document):
     # return scores[0][1] if scores[0][0][0][0] >= 1.5 else None
     return jsonify(
         result=[
-                {score[1]:score[0][0][0]} for score in scores if score[0][0][0] >= 0.95
+                {score[1]:score[0][0][0]} for score in scores if score[0][0][0] >= 0.95 and
+                score[1] != processed_document['bug_id']
             ])
 
 
