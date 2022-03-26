@@ -123,7 +123,9 @@ const DashBoard = () => {
 
     return (
         <div className="dashboard-container">
-            <Navbar />
+            <div className="nav-bar">
+                <Navbar />
+            </div>
             <div className="search-container">
                 <div className="search-bar">
                     <Box
@@ -146,7 +148,11 @@ const DashBoard = () => {
                             }}
 
                             onChange={(event) => {
-                                setSearchID(event.target.value);
+                                let list = event.target.value;
+                                if(list.split(',').length > 3)
+                                    alert("Exceeded");
+                                else
+                                    setSearchID(list);
                             }}
                         />
                     </Box>
@@ -158,7 +164,15 @@ const DashBoard = () => {
                             marginLeft: 1
                         }}
                         onClick={() => {
-                            handleSearch(searchID)
+                            let list = searchID.split(',');
+                            if(list.length > 1){
+                                setDropDownList(list)
+                                setListSearchID(list[0])
+                            }
+                            else{
+                                setDropDownList([])
+                                handleSearch(list[0])
+                            }
                         }}
                     >
                         Search
@@ -169,6 +183,7 @@ const DashBoard = () => {
                     <input
                         accept=".json, .csv"
                         type={'file'}
+                        title={'Upload file containing bug ids'}
                         onChange={(event) => {
                             onFileChange(event)
                         }}
@@ -202,14 +217,14 @@ const DashBoard = () => {
                         <div className="select-dropbox">
                             <DropDownBox
                                 bugList={dropDownList}
+                                value={listSearchID}
                                 onSelect={onDropListChange}
                             />
                         </div>
                         {
-                            (receivedReport) ?
-                            <DataTable content={receivedReport}/>
-                            :
-                            <h1>No report</h1>
+                            (receivedReport) 
+                            ?   <DataTable content={receivedReport}/>
+                            :   <h1>No report</h1>
                         }
                     </Grid>
                     <Grid
@@ -244,10 +259,10 @@ const DashBoard = () => {
                                                         >
                                                             <Paper sx={{ width:'100%', paddingLeft:1}} >
                                                                 <Typography >
-                                                                        Bug ID: { key[0] }
+                                                                    <b>Bug ID:</b>{ key[0] }
                                                                 </Typography>
                                                                 <Typography>
-                                                                    Score: { data[key[0]] }
+                                                                    <b>Score:</b>{ data[key[0]] }
                                                                 </Typography>
                                                             </Paper>
                                                         </ListItem>
@@ -264,10 +279,9 @@ const DashBoard = () => {
                             </div>
                             <div id="report">
                                 {
-                                    (receivedItemReport) ?
-                                    <DataTable content={receivedItemReport} />
-                                    :
-                                    <h1>No report found</h1>
+                                    (receivedItemReport)
+                                    ?   <DataTable content={receivedItemReport} />
+                                    :   <h1>No report found</h1>
                                 }                                
                             </div>
                         </div>
