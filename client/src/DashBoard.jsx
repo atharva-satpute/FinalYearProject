@@ -208,9 +208,10 @@ const DashBoard = () => {
                         item
                         xs={16} md={8}
                         sx={{
-                            height:'100%', 
+                            height: 582, 
                             position: 'relative',
                             overflowY: 'auto',
+                            minHeight: 582,
                             maxHeight: 675
                         }}
                     >
@@ -233,9 +234,10 @@ const DashBoard = () => {
                         md={8}
                         bgcolor='rgb(192,192,192)'
                         sx={{
+                            height: 582,
                             position: 'relative',
                             overflowY: 'auto',
-                            minHeight: 675,
+                            minHeight: 582,
                             maxHeight: 675
                         }}
                     >
