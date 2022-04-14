@@ -14,6 +14,9 @@ import DropDownBox from "./components/DropDownBox/DropDownBox";
 
 const DashBoard = () => {
 
+    const regexExp = /[a-zA-Z0-9]/;
+    const charNotRequired = /[^a-zA-Z0-9,]/;
+
     const [searchID, setSearchID] = useState("");
     const [listSearchID, setListSearchID] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
@@ -33,6 +36,18 @@ const DashBoard = () => {
 
     const onDropListChange = (event) => {
         setListSearchID(event.target.value)
+    }
+
+    const onClickSearchButton = () => {
+        let list = searchID.split(',');
+        if(list.length > 1){
+            setDropDownList(list);
+            setListSearchID(list[0]);
+        }
+        else {
+            setDropDownList([]);
+            handleSearch(list[0]);
+        }
     }
 
     useEffect(() => {
@@ -147,12 +162,32 @@ const DashBoard = () => {
                                 paddingLeft: 2
                             }}
 
+                            onKeyDown={(event) => {
+                                let list = event.target.value.split(',');
+
+                                // Search results when Enter is pressed
+                                if(event.key === 'Enter')
+                                    onClickSearchButton();
+
+                                else if(event.key === 'Backspace')
+                                    return true;
+                                
+                                // Show alert box when user tries to enter more than 3 IDs
+                                else if(list.length > 3 && regexExp.test(event.key)){
+                                    alert('Max 3 comma-separated IDs. For more than 3 IDs, upload a .csv file');
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                }
+
+                                // To exclude special characters
+                                else if(charNotRequired.test(event.key)){
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                }
+                            }}
+
                             onChange={(event) => {
-                                let list = event.target.value;
-                                if(list.split(',').length > 3)
-                                    alert("Exceeded");
-                                else
-                                    setSearchID(list);
+                                setSearchID(event.target.value);
                             }}
                         />
                     </Box>
@@ -163,17 +198,7 @@ const DashBoard = () => {
                             maxHeight: '100%',
                             marginLeft: 1
                         }}
-                        onClick={() => {
-                            let list = searchID.split(',');
-                            if(list.length > 1){
-                                setDropDownList(list)
-                                setListSearchID(list[0])
-                            }
-                            else{
-                                setDropDownList([])
-                                handleSearch(list[0])
-                            }
-                        }}
+                        onClick={onClickSearchButton}
                     >
                         Search
                     </Button>
@@ -181,7 +206,7 @@ const DashBoard = () => {
                 <span>or</span>
                 <div className="file-upload-section">
                     <input
-                        accept=".json, .csv"
+                        accept=".csv"
                         type={'file'}
                         title={'Upload file containing bug ids'}
                         onChange={(event) => {
@@ -284,7 +309,7 @@ const DashBoard = () => {
                                     (receivedItemReport)
                                     ?   <DataTable content={receivedItemReport} />
                                     :   <h1>No report found</h1>
-                                }                                
+                                }
                             </div>
                         </div>
                     </Grid>
