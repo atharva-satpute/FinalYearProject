@@ -9,6 +9,7 @@ import { useState } from "react";
 import config from "./config/config.json";
 import DataTable from "./components/DataTable/DataTable";
 import DropDownBox from "./components/DropDownBox/DropDownBox";
+import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
 
 
 
@@ -20,10 +21,12 @@ const DashBoard = () => {
     const [searchID, setSearchID] = useState("");
     const [listSearchID, setListSearchID] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
-    const [receivedData, setReceivedData] = useState(null);
+    const [receivedData, setReceivedData] = useState([]);
     const [receivedReport, setReceivedReport] = useState(null);
     const [receivedItemReport, setReceivedItemReport] = useState(null);
     const [dropDownList, setDropDownList] = useState([]);
+    const [isLoadingReport,setIsLoadingReport] = useState(false);
+    const [isLoadingList, setIsLoadingList] = useState(false);
 
     let buglistElement = document.getElementById('bug-list');
     let reportToDisplay = document.getElementById('report');
@@ -39,6 +42,13 @@ const DashBoard = () => {
     }
 
     const onClickSearchButton = () => {
+        if(searchID.trim().length === 0){
+            alert('Enter Bug ID');
+            return;
+        }
+
+        setIsLoadingList(true);
+        setIsLoadingReport(true);
         let list = searchID.split(',');
         if(list.length > 1){
             setDropDownList(list);
@@ -57,37 +67,42 @@ const DashBoard = () => {
     },[listSearchID])
 
     function handleSearch(id) {
-        if(id === "")
-            alert('Enter Bug Id');
-        else {
-        
-            let URL = `http://${config.server.url}:${config.server.port}/search/${id}`;
+        let URL = `http://${config.server.url}:${config.server.port}/search/${id}`;
 
-            // Fetch the report with ID=searchID
-            axios.get(
-                URL
-            )
-            .then((response) => {
-                setReceivedReport(response.data)
-            })
-            .catch((error) => {
-                console.log('Error in receiving the report',error.response.data);
-            });
+        // Fetch the report with ID=searchID
+        axios.get(
+            URL
+        )
+        .then((response) => {
+            setReceivedReport(response.data);
+            setIsLoadingReport(false);
+        })
+        .catch((error) => {
+            console.log('Error in receiving the report',error.response.data);
+        });
 
-            // POST the searchID
-            axios.post(
-                URL
-            )
-            .then((response) => {
-                setReceivedData(response.data.result)
-            })
-            .catch((error) => {
-                console.log('Bug Report error:',error.response.data);
-            });
-        }
+        // POST the searchID
+        axios.post(
+            URL
+        )
+        .then((response) => {
+            if(Object.keys(response.data).length > 0)
+                setReceivedData(response.data.result);
+            else
+                setReceivedData([]);
+            setIsLoadingList(false);
+        })
+        .catch((error) => {
+            console.log('Bug Report error:',error.response.data);
+            setIsLoadingList(false);
+        });
     }
 
     const onFileUpload = () => {
+        if(selectedFile == null){
+            alert("Please upload file");
+            return;
+        }
         let formData = new FormData();
         formData.append(
             "file",
@@ -193,6 +208,7 @@ const DashBoard = () => {
                     </Box>
                     <Button
                         variant="contained"
+                        disabled={isLoadingList && isLoadingReport}
                         sx={{
                             maxWidth: '100%',
                             maxHeight: '100%',
@@ -215,6 +231,7 @@ const DashBoard = () => {
                     />
                     <Button
                         variant="contained"
+                        disabled={isLoadingList && isLoadingReport}
                         sx={{ height: '25px' }}
                         onClick={ onFileUpload }
                     >
@@ -248,9 +265,11 @@ const DashBoard = () => {
                             />
                         </div>
                         {
-                            (receivedReport) 
-                            ?   <DataTable content={receivedReport}/>
-                            :   <h1>No report</h1>
+                            (isLoadingReport)
+                            ?   <LoadingSpinner />
+                            :   (receivedReport) 
+                                ?   <DataTable content={receivedReport}/>
+                                :   <h1>No report</h1>
                         }
                     </Grid>
                     <Grid
@@ -269,7 +288,10 @@ const DashBoard = () => {
                         <div id="change-output">
                             <div id="bug-list">
                                 {
-                                    (receivedData) ?
+                                    (isLoadingList)
+                                    ?   <LoadingSpinner />
+                                    :
+                                    (receivedData.length > 0) ?
                                     (
                                         <List>
                                             {
