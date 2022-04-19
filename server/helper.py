@@ -53,6 +53,9 @@ def process(bug_id):
     if processed_bug_report is None:
         bug_report = db.getReportById(bug_id)
 
+        if bug_report is None:
+            return jsonify({})
+
         # Preprocess the document
         processed_document = processDocument(bug_report)
     
