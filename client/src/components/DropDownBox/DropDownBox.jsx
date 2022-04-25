@@ -8,8 +8,10 @@ const DropDownBox = (props) => {
                 value={props.value}
                 autoWidth
                 displayEmpty
+                disabled={(props.bugList.length === 0) ? true: false}
                 inputProps={{ 'aria-label': 'Without label' }}
-                sx={{ height:40 }}
+                MenuProps={{ style: { maxHeight: 400 }}}
+                sx={{ height: 40 }}
                 onChange={(event) => {
                     props.onSelect(event)
                 }}
