@@ -1,6 +1,6 @@
 # Built-in Libraries
+import ast
 from flask import jsonify
-import json
 import os
 import pandas as pd
 import sys
@@ -20,6 +20,7 @@ import gensim
 # Local Libraries
 from Constants.Codes import error_codes
 from databases.mongodb import MongoDB
+from databases.sqlitedb import Sqlite, tupleToDict
 from dbrd.processing import cleaning, tokenize, removeStopwords, processDocument, wordStemming
 from dbrd.scores import score1, score2, score3
 from models.Response import Response
@@ -27,11 +28,12 @@ from models.Response import Response
 
 db = None
 skip_gram_model = None
+db_type = None
 FILE_PATH = os.path.join(sys.path[1] + os.sep,"uploads" + os.sep)
 
 
 def initialize(args):
-    global db, skip_gram_model
+    global db, skip_gram_model,db_type
 
 
     if not skip_gram_model:
@@ -40,9 +42,11 @@ def initialize(args):
 
     if not db:
         if args["database_type"] == 1:
+            db_type = 1
             db = MongoDB(args["database_url"], args["database_name"], args["collection_name"])
         else:
-            pass
+            db_type = 2
+            db = Sqlite(args["database_url"], args["database_name"], args["collection_name"])
 
 
 def process(bug_id):
@@ -53,6 +57,7 @@ def process(bug_id):
     if processed_bug_report is None:
         bug_report = db.getReportById(bug_id)
 
+        # If report with id=bug_id is not present in the database
         if bug_report is None:
             return jsonify({})
 
@@ -92,7 +97,20 @@ def findDuplicates(processed_document):
     cursor = db.getProcessedReportsWithProductAndComponent(processed_document['product'],
                                                            processed_document['component'])
 
-    scores = [(calculateScore(processed_document, doc), doc['bug_id']) for doc in cursor]
+    if db_type == 1:
+        scores = [(calculateScore(processed_document, doc), doc['bug_id']) for doc in cursor]
+    else:
+        scores = []
+        for doc in cursor:
+
+            # Each row fetched from the database will be contained in a tuple
+            # and needs to be converted to a dictionary for further processing
+            doc = tupleToDict(doc,1)
+
+            #Converting string list to python list
+            doc['data'] = ast.literal_eval(doc['data'])
+
+            scores.append((calculateScore(processed_document, doc), doc['bug_id']))
 
     # Sorting the similarity scores in descending order
     scores.sort(key=lambda i: i[0], reverse=True)
