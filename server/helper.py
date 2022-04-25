@@ -37,8 +37,12 @@ def initialize(args):
 
 
     if not skip_gram_model:
-        skip_gram_model = gensim.models.Word2Vec.load(
-            os.path.join(sys.path[0],"dbrd","trained_model","trained_sg.model"), mmap='r')
+        try:
+            skip_gram_model = gensim.models.Word2Vec.load(
+                os.path.join(sys.path[0],"dbrd","trained_model","trained_sg.model"), mmap='r')
+        except FileNotFoundError as err:
+            print('Cannot find model:',err.filename)
+            exit(0)
 
     if not db:
         if args["database_type"] == 1:
@@ -133,7 +137,6 @@ def calculateScore(document1, document2):
     score = (_score1 + _score2) * _score3
 
     return score
-
 
 def processDocument(document):
     content_of_interest = document['description'] + document['short_desc']  # COI
