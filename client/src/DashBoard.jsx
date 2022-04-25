@@ -43,7 +43,7 @@ const DashBoard = () => {
 
     const onClickSearchButton = () => {
         if(searchID.trim().length === 0){
-            alert('Enter Bug ID');
+            alert("Please enter a valid Bug ID");
             return;
         }
 
@@ -56,6 +56,7 @@ const DashBoard = () => {
         }
         else {
             setDropDownList([]);
+            setListSearchID("");
             handleSearch(list[0]);
         }
     }
@@ -79,6 +80,7 @@ const DashBoard = () => {
         })
         .catch((error) => {
             console.log('Error in receiving the report',error.response.data);
+            setIsLoadingReport(false);
         });
 
         // POST the searchID
@@ -99,8 +101,15 @@ const DashBoard = () => {
     }
 
     const onFileUpload = () => {
-        if(selectedFile == null){
-            alert("Please upload file");
+        // When no file is selected
+        if(selectedFile == null || selectedFile.name === ''){
+            alert("Please upload a .csv file");
+            return;
+        }
+
+        // When file other than .csv file is uploaded
+        if(selectedFile.name.split('.')[1] !== 'csv'){
+            alert("Please upload .csv file only");
             return;
         }
         let formData = new FormData();
@@ -119,8 +128,8 @@ const DashBoard = () => {
                 }
             )
             .then((response) => {
-                console.log("Response:",response);
                 setDropDownList(response.data);
+                setListSearchID(response.data[0]);
             })
             .catch((error) => {
                 console.log("Error:",error.response.data);
