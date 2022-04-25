@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import yaml
+from werkzeug.utils import secure_filename
 
 # Third-party Libraries
 from flask_cors import CORS
@@ -16,7 +17,8 @@ from models.Response import Response
 
 # This file's directory path
 PATH = sys.path[1] + os.sep
-UPLOAD_FILE_PATH = PATH + 'uploads' + os.sep
+UPLOAD_FILE_PATH = PATH + 'uploads'
+os.makedirs(UPLOAD_FILE_PATH, exist_ok=True)
 
 
 # Loading configurations
@@ -60,12 +62,14 @@ def hello_world():
 
 
 
-# React Routes (.json,.csv files)
+# React Routes (.csv files)
 @app.route('/upload', methods=['POST'])
 def fileUpload():
     uploadedFile = request.files['file']
     if uploadedFile.filename != '':
-        return jsonify(handleFile(uploadedFile.filename))
+        fileName = secure_filename(uploadedFile.filename)
+        uploadedFile.save(os.path.join(UPLOAD_FILE_PATH,fileName))
+        return jsonify(handleFile(fileName))
 
 @app.route('/search/<bug_id>', methods=['GET','POST'])
 def searchFile(bug_id):
