@@ -36,3 +36,6 @@ class MongoDB(DB):
         query_reports = self.db[self.processed_collection].find(query)
 
         return query_reports
+    
+    def close(self):
+        self.client.close()

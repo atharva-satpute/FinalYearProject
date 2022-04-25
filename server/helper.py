@@ -150,3 +150,7 @@ def getBugReport(bug_id):
 def handleFile(fileName):
     data = pd.read_csv(FILE_PATH + fileName, header=None)
     return list(data[0])
+
+def closeConnections():
+    print('Closing connections!!')
+    db.close()

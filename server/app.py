@@ -11,7 +11,7 @@ from flask import Flask, jsonify, request
 
 # Local Libraries
 from Constants.Codes import error_codes
-from helper import process, initialize, getBugReport, handleFile
+from helper import process, initialize, getBugReport, handleFile, closeConnections
 from models.Response import Response
 
 # This file's directory path
@@ -81,3 +81,4 @@ if __name__ == "__main__":
         port = config['flaskserver']['port'],
         debug=True
     )
+    closeConnections()

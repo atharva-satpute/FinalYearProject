@@ -20,4 +20,6 @@ class DB:
 
     def getProcessedReportsWithProductAndComponent(self, product, component):
         pass
-
+    
+    def close(self):
+        pass
