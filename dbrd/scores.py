@@ -32,7 +32,7 @@ def score3(document1, document2):
     score = 0.0
     if product1 == product2 and component1 == component2:
         score = 1.0
-    elif product1 == product2 or component1 == component2:
-        score = 0.5
+    elif product1 == product2 and component1 != component2:
+        score = 0.75
 
     return score
