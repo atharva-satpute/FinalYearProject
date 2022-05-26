@@ -11,9 +11,7 @@ from flask_cors import CORS
 from flask import Flask, jsonify, request
 
 # Local Libraries
-from Constants.Codes import error_codes
 from helper import process, initialize, getBugReport, handleFile, closeConnections
-from models.Response import Response
 
 # This file's directory path
 PATH = sys.path[1] + os.sep
@@ -44,23 +42,6 @@ args = vars(ap.parse_args())
 # Initializing
 app = Flask(__name__)
 CORS(app)
-
-# Back-end Routes
-@app.route("/status", methods=['GET'])
-def hello_world():
-    return vars(Response(error_codes['LP'], "Application is running...! Everything looks fine."))
-
-
-# @app.route("/insert", methods=['POST'])
-# def insertIntoDB():
-#     #try:
-#         data = request.json
-#         print(data)
-#         return process(data)
-    #except:
-#         return vars(Response(error_codes['ISE'], "Something wrong happened at server side"))
-
-
 
 # React Routes (.csv files)
 @app.route('/upload', methods=['POST'])
