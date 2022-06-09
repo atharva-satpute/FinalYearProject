@@ -18,12 +18,10 @@ sys.path.insert(0,os.path.dirname(sys.path[0]))
 import gensim
 
 # Local Libraries
-from Constants.Codes import error_codes
 from databases.mongodb import MongoDB
 from databases.sqlitedb import Sqlite, tupleToDict
 from dbrd.processing import cleaning, tokenize, removeStopwords, processDocument, wordStemming
 from dbrd.scores import score1, score2, score3
-from models.Response import Response
 
 
 db = None
@@ -54,9 +52,7 @@ def initialize(args):
 
 
 def process(bug_id):
-    # _id = db.addReport(bug_report)
-    # if not _id:
-    #     return "Error"
+
     processed_bug_report = db.getProcessedReportById(bug_id)
     if processed_bug_report is None:
         bug_report = db.getReportById(bug_id)
@@ -80,14 +76,8 @@ def process(bug_id):
 
     possible_duplicate = findDuplicates(processed_bug_report)
     if not possible_duplicate:
-        res = vars(Response(error_codes['SS'], "No duplicate found. The bug report has been added into the database."))
-        print(res)
-        return res
+        return None
     else:
-        # res = vars(
-        #     Response(error_codes['SS'], "Bug report with id {}, is a possible duplicate.".format(possible_duplicate)))
-        # print(res)
-        # return res
         return possible_duplicate
 
 
